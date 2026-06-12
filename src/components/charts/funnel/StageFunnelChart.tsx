@@ -59,7 +59,9 @@ export default function StageFunnelChart() {
           <LabelList
             dataKey="cvr"
             position="right"
-            formatter={(v: number | null) => (v === null ? "entry" : `${v}% CVR`)}
+            formatter={(v: string | number | boolean | null | undefined) =>
+              v === null || v === undefined ? "entry" : `${v}% CVR`
+            }
             style={{ fontSize: 11, fill: "#64748b", fontWeight: 600 }}
           />
         </Bar>

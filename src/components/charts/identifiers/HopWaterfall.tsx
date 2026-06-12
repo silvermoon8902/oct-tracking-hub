@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
   ResponsiveContainer,
@@ -98,7 +99,7 @@ export default function HopWaterfall() {
             <LabelList
               dataKey="present"
               position="top"
-              formatter={(v: number) => `${v}%`}
+              formatter={(v: ReactNode) => `${v}%`}
               style={{ fontSize: 11, fill: "#475569", fontWeight: 600 }}
             />
             {rows.map((r) => (
