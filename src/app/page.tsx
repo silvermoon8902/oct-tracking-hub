@@ -1,65 +1,243 @@
 import Image from "next/image";
+import { Download, Radio, ArrowUpRight } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+import KpiCard from "@/components/KpiCard";
+import Card from "@/components/Card";
+import FunnelFlow from "@/components/FunnelFlow";
+import ActivityFeed from "@/components/ActivityFeed";
+import AlertsStrip from "@/components/AlertsStrip";
+import SourceStrip from "@/components/SourceStrip";
+import Sparkline from "@/components/charts/Sparkline";
+import LoopHealthGauge from "@/components/charts/overview/LoopHealthGauge";
+import SignalTrendChart from "@/components/charts/overview/SignalTrendChart";
+import PostbackBars from "@/components/charts/overview/PostbackBars";
+import { ACCOUNT, PRIMARY_KPIS, DESTINATIONS } from "@/lib/data";
+import { fmtNumber, fmtPercent } from "@/lib/format";
 
-export default function Home() {
+export default function OverviewPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <PageHeader
+        title="Command Center — Feedback-Loop Health"
+        subtitle={`${ACCOUNT.brand} · ${ACCOUNT.vertical} · ${ACCOUNT.window}`}
+      >
+        <span className="hidden items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 sm:inline-flex">
+          <Radio className="h-3.5 w-3.5" />
+          Demo data
+        </span>
+        <button className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--ink)] px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+          <Download className="h-4 w-4" />
+          Export
+        </button>
+      </PageHeader>
+
+      {/* Hero band */}
+      <div className="relative overflow-hidden rounded-2xl border border-border shadow-sm">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1600&q=75&auto=format&fit=crop"
+          alt="Analytics dashboard"
+          width={1600}
+          height={420}
           priority
+          className="h-44 w-full object-cover sm:h-52"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <div className="absolute inset-0 bg-gradient-to-r from-[var(--ink)]/94 via-[var(--ink)]/74 to-[var(--ink)]/20" />
+        <div className="absolute inset-0 flex flex-col justify-center gap-2 p-6 sm:p-8">
+          <span className="w-fit rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
+            Closed-loop OCT · CRM → Zapier → Google Ads + Meta
+          </span>
+          <h2 className="max-w-2xl text-xl font-bold text-white sm:text-2xl">
+            Every qualified and enrolled outcome, matched and posted back — clean,
+            deduped, and optimizable.
+          </h2>
+          <p className="max-w-xl text-sm text-white/75">
+            One view that proves the feedback loop is actually closing: identifier
+            capture, EMQ, dedup, attribution coverage, and platform acceptance.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* KPI grid */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {PRIMARY_KPIS.map((kpi) => (
+          <KpiCard key={kpi.id} kpi={kpi} />
+        ))}
+      </div>
+
+      {/* Health gauge + funnel flow */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card
+          title="Loop Health"
+          subtitle="Composite of capture, match, EMQ, dedup, uptime"
+        >
+          <LoopHealthGauge score={81} />
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div className="rounded-lg bg-surface-muted px-3 py-2">
+              <div className="font-semibold text-foreground">82%</div>
+              <div className="text-muted">Google match</div>
+            </div>
+            <div className="rounded-lg bg-surface-muted px-3 py-2">
+              <div className="font-semibold text-foreground">7.0</div>
+              <div className="text-muted">Meta EMQ</div>
+            </div>
+            <div className="rounded-lg bg-surface-muted px-3 py-2">
+              <div className="font-semibold text-foreground">98.4%</div>
+              <div className="text-muted">Dedup</div>
+            </div>
+            <div className="rounded-lg bg-surface-muted px-3 py-2">
+              <div className="font-semibold text-foreground">99.1%</div>
+              <div className="text-muted">Zap uptime</div>
+            </div>
+          </div>
+        </Card>
+
+        <Card
+          className="lg:col-span-2"
+          title="Funnel Flow → Platforms"
+          subtitle="CRM outcome stages posted back to Google Ads OCT & Meta CAPI"
+        >
+          <FunnelFlow />
+        </Card>
+      </div>
+
+      {/* Destination post-back tiles */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {DESTINATIONS.map((d) => (
+          <div key={d.id} className="rounded-xl border border-border bg-surface p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+                {d.slug ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`https://cdn.simpleicons.org/${d.slug}`}
+                    alt={d.name}
+                    width={18}
+                    height={18}
+                    className="h-[18px] w-[18px]"
+                  />
+                ) : (
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ background: d.color }}
+                  />
+                )}
+              </div>
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                {fmtPercent(d.acceptedRate)} accepted
+              </span>
+            </div>
+            <div className="mt-3 text-sm font-semibold leading-tight text-foreground">
+              {d.name}
+            </div>
+            <div className="text-[11px] text-muted">{d.detail}</div>
+            <div className="mt-3 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-lg font-bold text-foreground">{fmtNumber(d.accepted)}</div>
+                <div className="text-[11px] text-muted">
+                  of {fmtNumber(d.sent)} sent · {d.metricLabel} {d.metricValue}
+                </div>
+              </div>
+              <div className="h-9 w-20">
+                <Sparkline data={d.spark} color={d.color} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Trend + activity */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card
+          className="lg:col-span-2"
+          title="Signal Volume & Match Quality"
+          subtitle="Events sent vs. matched % and Meta CAPI success · 30 days"
+          action={
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5 text-muted">
+                <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" /> Events
+              </span>
+              <span className="flex items-center gap-1.5 text-muted">
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" /> Matched %
+              </span>
+            </div>
+          }
+        >
+          <SignalTrendChart />
+        </Card>
+
+        <Card
+          title="Live Signal Activity"
+          subtitle="Latest conversions across the loop"
+          bodyClassName="py-2"
+        >
+          <ActivityFeed />
+        </Card>
+      </div>
+
+      {/* Posted-back vs CRM */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <Card
+          className="lg:col-span-2"
+          title="Revenue Posted Back vs. CRM Actual"
+          subtitle="Forth CRM source-of-truth vs. value accepted by each platform"
+        >
+          <PostbackBars />
+        </Card>
+
+        <Card
+          title="The Gap"
+          subtitle="What the platforms can't yet see"
+          action={
+            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-brand">
+              Funnel <ArrowUpRight className="h-3.5 w-3.5" />
+            </span>
+          }
+        >
+          <div className="space-y-3">
+            <div className="rounded-lg bg-rose-50 p-4">
+              <div className="text-xs font-medium text-rose-700">
+                Unattributable enrolled revenue
+              </div>
+              <div className="mt-0.5 text-2xl font-bold text-rose-700">$243.6K</div>
+              <div className="text-[11px] text-rose-600/80">
+                58 Enrolled outcomes with no surviving click ID or PII match
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center justify-between">
+                <span className="text-muted">Meta over-reports vs CRM</span>
+                <span className="font-semibold text-amber-600">+12%</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted">Google over-reports vs CRM</span>
+                <span className="font-semibold text-emerald-600">+6%</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted">Signal posted within window</span>
+                <span className="font-semibold text-foreground">93%</span>
+              </li>
+            </ul>
+          </div>
+        </Card>
+      </div>
+
+      {/* Alerts */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Active Alerts</h3>
+          <span className="text-xs text-muted">Prioritized across all panels</span>
         </div>
-      </main>
+        <AlertsStrip />
+      </div>
+
+      {/* Sources */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Connected Stack</h3>
+          <span className="text-xs text-muted">Last sync {ACCOUNT.lastSync}</span>
+        </div>
+        <SourceStrip />
+      </div>
     </div>
   );
 }
